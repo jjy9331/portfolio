@@ -1,0 +1,14 @@
+total_df1 = pd.merge(j1,j2, how='inner',left_index=True, right_index=True)
+
+total_df2 = pd.merge(total_df1,j3, how='inner',left_index=True, right_index=True)
+
+total_df3 = pd.merge(total_df2,j4, how='inner',left_index=True, right_index=True)
+
+job_data = total_df3
+
+total = job_data.T
+total
+
+
+#total.to_excel(r'/Users/jeongjiyong/Desktop/일자리/전국고용자수데이터.xlsx')
+total.to_excel(r’/여러분이 파일 저장하고 싶은 폴더 경로를 넣어주세요/전국고용자수데이터.xlsx')

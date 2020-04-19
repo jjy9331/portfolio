@@ -1,0 +1,65 @@
+import folium
+
+
+#매매가격 지수의 증감률 구하여 데이터프레임으로 만들기
+
+diff_pct = ((price_index.loc['2017-6-1']/price_index.loc['2019-6-1']) - 1) * 100
+diff_df = pd.DataFrame({'증감률':diff_pct})
+
+diff_df
+
+
+#증감률 데이터프레임에 법정동 코드 추가
+
+filtered_code.index = [filtered_code['시도명'], filtered_code['시군구명']]
+
+code = []
+for local in diff_df.index:
+    if local[0] in filtered_code.index:
+        temp_df = filtered_code.loc[local[0]]
+        if local[1] in temp_df.index:
+            #~구일 때 반복문
+            code.append(temp_df.loc[local[1]]['법정동코드'])
+        elif local[1] + '시' in temp_df.index:
+            #~시일 때 반복문
+            code.append(temp_df.loc[local[1] + '시']['법정동코드'])
+        elif local[1] == '세종':
+            code.append('36110')
+        else:
+            code.append('')
+            #법정동이 없으면 ''(공백)으로 처리
+    else:
+        code.append('')
+        
+diff_df['법정동코드'] = code
+
+filtered_code
+
+#folium으로 choropleth 매매가격 지수 증감률 지도 만들기 
+
+import json
+
+# rfile = open(r'C:\Users\JK\Desktop\부동산 데이터\TL_SCCO_SIG_WGS84.json', 'r', encoding='utf-8').read()
+rfile = open(r' 여러분이 내려 받은 TL_SCCO_SIG_WGS84.json파일의 디렉터리를 넣으세요/지도와 부동산TL_SCCO_SIG_WGS84.json', 'r', encoding='utf-8').read()
+jsonData = json.loads(rfile)
+    
+korea_map = folium.Map(location=[36, 127], zoom_start=7)
+    
+korea_map.choropleth(
+ geo_data=jsonData,
+ #geo_data 경계선(도형 관련 데이터)
+ data=diff_df,
+ #경계선, 도형 연관 데이터 시리즈나 데이터프레임 연결해주는 인수
+ columns=['법정동코드', '증감률'],
+ key_on='feature.properties.SIG_CD',
+ #json 자료 properties 참조 부동 268
+ fill_color='RdYlGn',
+ fill_opacity=0.7,
+ line_opacity=0.5,
+ legend_name='증감률(%)'
+)
+
+korea_map
+
+#korea_map.save('/Users/jeongjiyong/Desktop/프롭테크 포트폴리오/2017~2019 문재인 대통령 부동산 증감 지도.html')
+korea_map.save('여러분이 다운받을 폴더 위치경로를 넣으세요/2017~2019 문재인 대통령 부동산 증감 지도.html')

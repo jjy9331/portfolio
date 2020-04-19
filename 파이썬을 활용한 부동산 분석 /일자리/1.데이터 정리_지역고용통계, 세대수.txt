@@ -1,0 +1,136 @@
+#지역고용통계 데이터 읽어오기
+
+import pandas as pd
+
+# job_path = r'C:\Users\JK\Desktop\부동산 데이터\지역고용통계.xls'
+job_path = r' 여러분이 내려 받은 지역고용통계 엑셀파일의 디렉터리를 넣으세요/행정구역_시군구__산업별_고용_표준산업분류9차__종사자_1인이상_사업체__2018 1:2.xlsx'
+house_n_path = r' 여러분이 내려 받은 세대수 엑셀파일의 디렉터리를 넣으세요/행정구역_시군구_별_주민등록세대수_2018.01xlsx.xlsx'
+price_path =  r' 여러분이 내려 받은 평균아파트매매가격 엑셀파일의 디렉터리를 넣으세요/평균매매가격_아파트)12.1-20.3.xlsx'
+
+
+job_raw = pd.read_excel(job_path, skiprows=1)
+
+job_raw
+
+
+#데이터프레임 다듬기
+
+job_data = job_raw[job_raw['산업별'] == '전산업']
+job_data = job_data[['지역별', '전체종사자 (명)']]
+job_data.columns = ['지역명',  '고용자수']
+
+job_data
+
+
+#지역명 나누기
+
+def get_sido(x):
+    temp = x.split(' ')[0]
+    if len(temp) != 4:
+        return temp[:2]
+    else:
+        return temp[0] + temp[2]
+
+job_data['시도'] = job_data['지역명'].apply(get_sido)
+job_data['구군'] = job_data['지역명'].apply(lambda x: x.split(' ')[1])
+#
+
+job_data
+
+
+#지역고용통계 전처리 과정 정리해서 함수화
+
+def job_preprocessing(path):
+    job_raw = pd.read_excel(path, skiprows=1)
+    job_data = job_raw[job_raw['산업별'] == '전산업']
+    job_data = job_data[['지역별', '전체종사자 (명)']]
+    job_data.columns = ['지역명',  '고용자수']
+    
+    def get_sido(x):
+        temp = x.split(' ')[0]
+        if len(temp) != 4:
+            return temp[:2]
+        else:
+            return temp[0] + temp[2]
+
+    job_data['시도'] = job_data['지역명'].apply(get_sido)
+    job_data['구군'] = job_data['지역명'].apply(lambda x: x.split(' ')[1])
+    
+    return job_data
+
+#세대수 엑셀 데이터 읽어오기
+
+house_n_raw = pd.read_excel(house_n_path)
+
+house_n_raw
+
+
+#세대수 데이터프레임에서 시도명 고치기
+
+house_n_raw.columns = ['시도', '구군', '세대수']
+
+big_col = []
+for num, temp in enumerate(house_n_raw['시도']):
+    if pd.isna(temp) :
+        big_col.append(big_col[num-1])
+        #2번이 NaN일 경우,[num-1] 1번(1개 전의 값) '서울특별시' 데이터를 추가하라는 뜻
+        #해당 열 안에서 이전 값은 위의 값을 말함.
+    else:
+        big_col.append(temp)
+
+house_n_raw['시도'] = big_col
+
+house_n_raw
+
+
+#세대수 데이터프레임에서 시도명 줄임말로 고치기
+
+def get_sido(x):
+    if len(x) != 4:
+        return x[:2]
+    else:
+        return x[0] + x[2]
+
+house_n_raw['시도'] = house_n_raw['시도'].apply(get_sido)
+house_n_data = house_n_raw[house_n_raw['구군'] != '소계']
+
+house_n_data
+
+
+
+#세대수 데이터 전처리 과정 함수화
+
+def house_number_preprocessing(path):
+    house_n_raw = pd.read_excel(path)
+    house_n_raw.columns = ['시도', '구군', '세대수']
+
+    big_col = []
+    for num, temp in enumerate(house_n_raw['시도']):
+        if pd.isna(temp) :
+            big_col.append(big_col[num-1])
+        else:
+            big_col.append(temp)
+
+    house_n_raw['시도'] = big_col
+    
+    def get_sido(x):
+        if len(x) != 4:
+            return x[:2]
+        else:
+            return x[0] + x[2]
+
+    house_n_raw['시도'] = house_n_raw['시도'].apply(get_sido)
+    house_n_data = house_n_raw[house_n_raw['구군'] != '소계']
+    
+    return house_n_data
+
+
+#시도 단위로 고용자수 보기
+
+
+job_df = job_preprocessing(job_path)
+
+job_sido = job_df.groupby('시도').sum()
+job_sido = job_sido.sort_values(by='고용자수', ascending=False)
+
+

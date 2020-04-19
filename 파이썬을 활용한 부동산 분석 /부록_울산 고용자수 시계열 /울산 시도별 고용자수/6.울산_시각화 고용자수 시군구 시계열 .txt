@@ -1,0 +1,72 @@
+import pandas as pd
+
+job_path = r’/엑셀파일 만든 다운받은 폴더 경로를 넣어주세요/울산고용자수데이터.xlsx'
+
+job_raw = pd.read_excel(job_path,index_col=0)
+
+job_raw = job_raw[['남구','울주군','북구','동구','중구']]
+job_raw 
+
+
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+import seaborn as sns
+
+%matplotlib inline
+
+# 맥OS 인 경우 위 두 줄을 입력하지 말고 아래 코드를 입력하세요
+# rc('font', family='AppleGothic')
+plt.rcParams['font.family'] = 'AppleGothic'
+
+ax = plt.subplot()
+ax2 = ax.twinx()
+
+g1= '남구'
+g2= '울주군'
+g3= '북구'
+g4= '동구'
+g5= '중구'
+
+name = '2018-2019 울산 지역별 고용현황'
+file = r'/Users/jeongjiyong/Desktop/일자리/울산고용시계열/'
+
+ln1 = ax.plot(job_raw[g1], label = g1 )
+ln2 = ax.plot(job_raw[g2], label = g2)
+ln3 = ax.plot(job_raw[g3],label = g3, color = 'blue', ls = '--')
+ln4 = ax.plot(job_raw[g4], label = g4)
+ln5 = ax.plot(job_raw[g5], label = g5)
+
+lns = ln1 +ln2 + ln3 + ln4 + ln5
+labs = [l.get_label() for l in lns]
+ax.legend(lns, labs, loc='upper left')
+plt.title(name)
+plt.savefig(file +" " +name)
+
+plt.show()
+
+
+
+job_raw[g1].plot(legend=g1)
+plt.title(g1)
+plt.savefig(file +" " +g1)
+plt.show()
+
+job_raw[g2].plot(legend=g2)
+plt.title(g2)
+plt.savefig(file +" " + g2)
+plt.show()
+
+job_raw[g3].plot(legend=g3)
+plt.title(g3)
+plt.savefig(file +" " + g3)
+plt.show()
+
+job_raw[g4].plot(legend=g4)
+plt.title(g4)
+plt.savefig(file +" " + g4)
+plt.show()
+
+job_raw[g5].plot(legend=g4)
+plt.title(g5)
+plt.savefig(file +" " + g5)
+plt.show()

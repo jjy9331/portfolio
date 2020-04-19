@@ -1,0 +1,67 @@
+
+
+#법정동 코드 정리
+
+import pandas as pd
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+# local_code = pd.read_excel(r'C:\Users\JK\Desktop\부동산 데이터\KIKcd_B.20190101.xlsx')
+local_code = pd.read_excel(r'/Users/jeongjiyong/Desktop/프롭테크 포트폴리오/법정동코드KIKcd_B.20181210.xlsx')
+local_code['법정동코드'] = local_code['법정동코드'].apply(lambda x: str(x)[:5])
+# lambda x: 익명의 함수 한번쓰고 끝날 때 쓰임. 
+filtered_code = local_code[['법정동코드', '시도명', '시군구명']].drop_duplicates()
+#중복되는 읍면동 .drop_duplicates()함수로 제거
+filtered_code.dropna(inplace=True)
+#.dropna(inplace=True) 데이터 없으면 행 모두 지우기
+filtered_code.loc[20477] = ('36110', '세종', '세종')
+
+filtered_code
+
+#법정동 코드 시도명 바꾸기
+
+import pandas as pd
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.set_option('display.width', 1000)
+
+def get_sido(x):
+    temp = x.split(' ')[0]
+    if len(temp) != 4:
+        return temp[:2]
+    else:
+        return temp[0] + temp[2]
+    
+filtered_code['시도명'] = filtered_code['시도명'].dropna().apply(get_sido)
+filtered_code['시군구명'] = filtered_code['시군구명'].dropna().apply(lambda x : x.split(' ')[-1])
+#창원시 성산구 -> 성산구 .dropna().apply(lambda x : x.split(' ')[-1]) x를 띄어씌기해서 나눠주고 [-1]있는 것은 제거
+filtered_code
+
+
+
+#증감률 데이터프레임에 법정동 코드 추가
+
+filtered_code.index = [filtered_code['시도명'], filtered_code['시군구명']]
+
+code = []
+for local in diff_df.index:
+    if local[0] in filtered_code.index:
+        temp_df = filtered_code.loc[local[0]]
+        if local[1] in temp_df.index:
+            #~구일 때 반복문
+            code.append(temp_df.loc[local[1]]['법정동코드'])
+        elif local[1] + '시' in temp_df.index:
+            #~시일 때 반복문
+            code.append(temp_df.loc[local[1] + '시']['법정동코드'])
+        elif local[1] == '세종':
+            code.append('36110')
+        else:
+            code.append('')
+            #법정동이 없으면 ''(공백)으로 처리
+    else:
+        code.append('')
+        
+diff_df['법정동코드'] = code
+
+filtered_code

@@ -1,0 +1,83 @@
+# 인허가 데이터 연도별로 
+
+year_permission = permission.groupby(permission.index.year).sum()
+
+
+# 인허가 데이터를 2년 뒤로 옮기기 
+
+modified_permission = year_permission.shift(2)
+temp = []
+for year in modified_permission.index:
+    temp.append(str(year) + '-6-1')
+modified_permission.index = pd.to_datetime(temp)
+
+
+#그래프를 위한 설정 
+
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+from matplotlib import style
+style.use('ggplot')
+%matplotlib inline
+
+# 윈도우인 경우 font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+# 윈도우인 경우 rc('font', family=font_name)
+# 맥OS인 경우 위 두 줄을 입력하지 말고 아래 코드를 입력하세요
+# rc('font', family='AppleGothic')
+plt.rcParams['font.family'] = 'AppleGothic'
+
+
+# 미분양 데이터를 추가한 그래프 
+
+plt.figure(figsize=(10,6))
+ax = plt.subplot()
+ax2 = ax.twinx()
+
+#원하는 지역 선택해서 si, gu에 넣어주세요. 
+#si,gu 텍스트는 동일해야합니다. si = '전국' , gu = '전국'
+#전국, 서울,경기,인천,대전,대구,부산,광주,울산
+
+si = '전국'
+gu = '전국'
+
+plt.title(si + '-' + gu)
+ln1 = ax.plot(price_index[si][gu]['2013-1':], label='매매가')
+ln2 = ax.plot(jun_index[si][gu]['2013-1':], label='전세가')
+ln3 = ax2.plot(modified_permission[si]['2013':]/10, label='인허가', color='green', ls='-')
+ln4 = ax2.plot(unsold[si]['2013':], label='미분양', color='orange', ls='-')
+lns = ln1 +ln2 + ln3 + ln4
+labs = [l.get_label() for l in lns]
+ax.legend(lns, labs, loc='upper left')
+park_date = '2017-3'
+plt.axvline(x=park_date, color='black', linestyle='-')
+
+park_date1 = '2013-4'
+park_date2 = '2013-7'
+park_date3 = '2013-8'
+park_date4 = '2014-9'
+park_date8 = '2016-11'
+plt.axvline(x=park_date1, color='red', linestyle='-')
+plt.axvline(x=park_date2, color='red', linestyle='-')
+plt.axvline(x=park_date3, color='red', linestyle='-')
+plt.axvline(x=park_date4, color='red', linestyle='-')
+plt.axvline(x=park_date8, color='red', linestyle='--')
+moon_date1 = '2017-6'
+moon_date2 = '2017-8'
+moon_date3 = '2017-10'
+moon_date4 = '2017-11'
+moon_date5 = '2017-12'
+moon_date6 = '2018-6'
+moon_date7 = '2018-9'
+moon_date8 = '2019-8'
+moon_date9 = '2019-12'
+plt.axvline(x=moon_date1, color='blue', linestyle='--')
+plt.axvline(x=moon_date2, color='blue', linestyle='--')
+plt.axvline(x=moon_date3, color='blue', linestyle='--')
+plt.axvline(x=moon_date4, color='blue', linestyle='--')
+plt.axvline(x=moon_date5, color='blue', linestyle='--')
+plt.axvline(x=moon_date6, color='blue', linestyle='--')
+plt.axvline(x=moon_date7, color='blue', linestyle='--')
+plt.axvline(x=moon_date8, color='blue', linestyle='--')
+plt.axvline(x=moon_date9, color='blue', linestyle='--')
+
+plt.show()

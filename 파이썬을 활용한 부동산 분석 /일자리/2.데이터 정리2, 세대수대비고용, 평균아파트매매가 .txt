@@ -1,0 +1,64 @@
+#시도 단위의 고용자수를 막대 그래프로 보기 
+
+import matplotlib.pyplot as plt
+from matplotlib import font_manager, rc
+from matplotlib import style
+import seaborn as sns
+style.use('ggplot')
+%matplotlib inline
+
+# 맥OS인 경우 위 두 줄을 입력하지 말고 아래 코드를 입력하세요
+# rc('font', family='AppleGothic')
+plt.rcParams['font.family'] = 'AppleGothic'
+
+# 2018 1/2 세대수 데이터 추가
+
+
+house_n_df = house_number_preprocessing(house_n_path)
+
+job_sido['세대수'] = house_n_df.groupby('시도').sum().loc[job_sido.index]
+job_sido['세대수대비고용'] = job_sido['고용자수']/job_sido['세대수'] * 100
+#세대수 중에서 고용자가 얼마나 있는지 보기 위해 나눔.
+
+job_sido
+
+
+#평균 아파트 매매가격 가져오기
+
+def gamjungwon_price_preprocessing(path):
+    row_price = pd.read_excel(path, skiprows=10)
+    
+    big_col = []
+    for num, temp in enumerate(row_price['지 역']):
+        if pd.isna(temp) :
+            big_col.append(big_col[num-1])
+        else:
+            big_col.append(temp)
+
+
+    small_col = []
+    for num in range(len(row_price)):
+        temp_list = list(row_price[['지 역', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3']].iloc[num])
+        for temp in temp_list[3::-1]:
+            if not pd.isna(temp):
+                small_col.append(temp)
+                break
+
+    row_price.index = [big_col, small_col]
+    
+    transposed_price = row_price.drop(['지 역', 'Unnamed: 1', 'Unnamed: 2', 'Unnamed: 3'], axis=1).T
+    
+    time_index = []
+    for time in transposed_price.index:
+        temp = time.split(' ')
+        time_index.append(temp[0][:-1]+'.'+temp[1][:-1])
+
+    transposed_price.index = pd.to_datetime(time_index)
+    
+    return transposed_price
+
+
+
+price_df = gamjungwon_price_preprocessing(price_path)
+
+

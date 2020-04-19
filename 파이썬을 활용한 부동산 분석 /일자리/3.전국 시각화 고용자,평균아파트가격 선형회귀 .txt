@@ -1,0 +1,84 @@
+
+def big_jobway_graph_location(x,l,file):
+    local = l
+    date = x
+    job_way = '고용자수'
+    job_way2 = '세대수대비고용'
+    save_path = file
+
+
+
+    price_data = gamjungwon_price_preprocessing(price_path)
+
+    sido_list = []
+    for i in job_sido.index:
+        sido_list.append(price_data.loc[date][i][i])
+      
+    job_sido['평균매매가격'] = sido_list
+
+
+
+    import matplotlib
+    from matplotlib import font_manager, rc
+    import platform
+
+    if platform.system() == 'Windows':
+    # 윈도우인 경우
+        font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+        rc('font', family=font_name)
+    else:    
+    # Mac 인 경우
+        rc('font', family='AppleGothic')
+    
+    matplotlib.rcParams['axes.unicode_minus'] = False  
+
+
+    import seaborn as sns
+
+    #고용율과 평균 아파트 매매가격의 scatter 그래프 그리기
+
+    plt.figure(figsize=(10, 6))
+    plt.title(date+' '+local)
+    plt.scatter(job_sido[job_way], job_sido['평균매매가격'], color='darkcyan', s=50)
+    sns.regplot(job_sido[job_way], job_sido['평균매매가격'], scatter=False, color='darkcyan')
+ 
+    plt.xlabel('고용지수(%)')
+    plt.ylabel('평균아파트매매가격')
+    for name in job_sido.index:
+        plt.text(job_sido[job_way][name]*1.02, job_sido['평균매매가격'][name], name, fontsize=13)
+   
+
+    name = f"{date}{' '}{local}{' '}{job_way}"
+    
+    plt.savefig(save_path + name)
+        
+    plt.show()
+       
+    # 세대수 대비 고용자수과 평균 아파트 매매가격의 scatter 그래프 그리기
+
+
+    plt.figure(figsize=(10, 6))
+    plt.title(date+' '+local)
+    plt.scatter(job_sido[job_way2], job_sido['평균매매가격'], color='darkcyan', s=50)
+    sns.regplot(job_sido[job_way2], job_sido['평균매매가격'], scatter=False, color='darkcyan')
+    plt.xlabel('세대수 대비 고용지수(%)')
+    plt.ylabel('평균아파트매매가격')
+    for name in job_sido.index:
+        plt.text(job_sido[job_way2][name]*1.02, job_sido['평균매매가격'][name], name, fontsize=13)
+          
+    name = f"{date}{' '}{local}{' '}{job_way2}"
+    
+    plt.savefig(save_path + name)
+    plt.show()
+    
+    return
+
+
+
+
+
+
+
+
+
+

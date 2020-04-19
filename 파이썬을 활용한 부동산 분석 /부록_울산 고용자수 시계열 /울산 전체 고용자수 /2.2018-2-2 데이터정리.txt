@@ -1,0 +1,86 @@
+import pandas as pd
+
+
+
+# job_path = r'C:\Users\JK\Desktop\부동산 데이터\지역고용통계.xls'
+job_path = r' 여러분이 내려 받은 2018 2/2 지역고용통계 엑셀파일의 디렉터리를 넣으세요/18.2:2 행정구역_시군구__산업별_고용_표준산업분류9차__종사자_1인이상_사업체__20200414175932.xlsx'
+job_raw = pd.read_excel(job_path)
+
+
+job_data = job_raw
+job_data = job_data[['지역별',"2018 2/2"]]
+job_data.columns = ['지역명',  '2018-2-2']
+
+
+
+#https://3months.tistory.com/292 참조
+job_data = job_data.drop(job_data.index[0])
+
+job_data
+
+
+def job_preprocessing(path):
+    job_raw = pd.read_excel(job_path)
+    job_data = job_raw
+    job_data = job_data[['지역별',"2018 2/2"]]
+    job_data.columns = ['지역명',  '2018-2-2']
+    
+    #https://3months.tistory.com/292 참조
+    job_data = job_data.drop(job_data.index[0])
+
+    def get_sido(x):
+        temp = x.split(' ')[0]
+        if len(temp) != 4:
+            return temp[:2]
+        else:
+            return temp[0] + temp[2]
+
+    job_data['시도'] = job_data['지역명'].apply(get_sido)
+    job_data['구군'] = job_data['지역명'].apply(lambda x: x.split(' ')[1])
+    #
+
+    return job_data
+
+
+
+
+def dataframe(file):
+    date = d
+    file = job_path
+    job_df = job_preprocessing(job_path)
+
+    job_sido = job_df.groupby('시도').sum()
+    job_sido = job_sido.sort_values(by=[d], ascending=False)
+
+    job_sido
+    
+    #https://stml.tistory.com/26 참조
+    job_sido = job_sido.drop(['지역명','구군'], axis=1)
+
+    return job_sido
+
+
+# 시도 단위로 고용자수 보기
+
+job_path = r' 여러분이 내려 받은 2018 2/2 지역고용통계 엑셀파일의 디렉터리를 넣으세요/18.2:2 행정구역_시군구__산업별_고용_표준산업분류9차__종사자_1인이상_사업체__20200414175932.xlsx'
+job_df = job_preprocessing(job_path)
+
+job_sido = job_df.groupby('시도').sum()
+job_sido = job_sido.sort_values(by='2018-2-2', ascending=False)
+
+job_sido = job_sido
+
+
+job_sido = job_sido.drop(['지역명','구군'],axis=1)
+
+j2 = job_sido
+
+j2
+
+
+
+
+
+
+
+

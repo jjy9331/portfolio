@@ -1,0 +1,104 @@
+import matplotlib
+from matplotlib import font_manager, rc
+import platform
+
+if platform.system() == 'Windows':
+# 윈도우인 경우
+    font_name = font_manager.FontProperties(fname="c:/Windows/Fonts/malgun.ttf").get_name()
+    rc('font', family=font_name)
+else:    
+# Mac 인 경우
+    rc('font', family='AppleGothic')
+    
+matplotlib.rcParams['axes.unicode_minus'] = False  
+
+
+
+#특정 날짜 전 지역 가격지수 가져오기
+
+new_data.loc['2017-3-1']
+
+# 두 날짜 사이의 부동산 가격지수 증감률 구하기
+
+diff = (new_data.loc['2017-3-1'] - new_data.loc['2013-2-1'])/new_data.loc['2016-2-1']*100
+
+diff.sort_values()
+
+# 2.22 누락된 지역 삭제 및 상위, 하위 10개만 출력
+
+
+diff = ((new_data.loc['2017-3-1'] - new_data.loc['2013-2-1']) / new_data.loc['2016-2-1'] * 100).dropna()
+print("하위 10개")
+print(diff.sort_values()[:10])
+print(' ')
+print("상위 10개")
+print(diff.sort_values(ascending=False)[:10])
+
+
+# 가격지수 막대그래프로 시각화 
+
+import numpy as np
+from matplotlib import style
+style.use('ggplot')
+
+fig = plt.figure(figsize=(13, 7))
+ind = np.arange(20)
+
+ax = fig.add_subplot(1, 3, 1)
+plt.title('2013.2~2017.3 가격 변화율 최하위 20')
+rects = plt.barh(ind, diff.sort_values()[:20].values,  align='center', height=0.5)
+plt.yticks(ind, diff.sort_values()[:20].index)
+for i, rect in enumerate(rects):
+    ax.text(0.95 * rect.get_width(),
+            rect.get_y() + rect.get_height() / 2.0,
+            str(round(diff.sort_values()[:20].values[i],2)) + '%',
+            ha='left', va='center', bbox=dict(boxstyle="round", fc=(0.5, 0.9, 0.7), ec="0.1"))
+    
+ax2 = fig.add_subplot(1, 3, 3)
+plt.title('2013.2~2017.3 가격 변화율 최상위 20')
+rects2 = plt.barh(ind, diff.sort_values()[-20:].values,  align='center', height=0.5)
+plt.yticks(ind,  diff.sort_values()[-20:].index)
+for i, rect in enumerate(rects2):
+    ax2.text(0.95 * rect.get_width(),
+             rect.get_y() + rect.get_height() / 2.0,
+             str(round(diff.sort_values()[-20:].values[i],2)) + '%', 
+             ha='right', va='center', bbox=dict(boxstyle="round", fc=(0.5, 0.9, 0.7), ec="0.1"))
+
+plt.show()
+
+
+# 가격지수 막대그래프로 시각화 
+
+#특정 지역만 선택해서 가격지수 증감률을 막대그래프로 시각화
+
+loca =  '전국 서울 경기 인천 광주 대구 부산 울산'
+
+temp_list = loca.split(" ")
+loca_list = []
+for temp in temp_list:
+    if ',' in temp:
+        temp_split = temp.split(",")
+        loca_list.append((temp_split[0], temp_split[1]))
+    else:
+        loca_list.append((temp, temp))
+
+diff = ((new_data.loc['2017-3-1', loca_list] - new_data.loc['2013-2-1', loca_list]) / new_data.loc['2013-2-1', loca_list] * 100).sort_values()
+
+num = len(loca_list)
+fig = plt.figure(figsize=(13, 7))
+ind = np.arange(num)
+
+ax = fig.add_subplot(1, 3, 1)
+plt.title('2013.2~2017.3 가격지수 변화율')
+rects = plt.barh(ind, diff.head(num).values,  align='center', height=0.5)
+plt.yticks(ind, diff.head(num).index)
+for i, rect in enumerate(rects):
+    ax.text(0.95 * rect.get_width(), rect.get_y() + rect.get_height() / 2.0, str(round(diff.head(20).values[i], 2)) + '%',
+            ha='left', va='center', bbox=dict(boxstyle="round", fc=(0.5, 0.9, 0.7), ec="0.1"))
+
+
+plt.show()
+
+
+
+

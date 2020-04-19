@@ -1,0 +1,20 @@
+
+
+# 2018-6-1 / 2018-12-1/ 2019-6-1/2019-12-1 중 하나 선택해서 date 넣어주세요.
+
+date= '2018-6-1'
+file= r’여러분이 다운받고 싶은 폴더 경로를 넣어주세요/일자리 선형회귀/2018상반기/'
+
+
+big_jobway_graph_location(date,'전국',file)
+jobway_graph_location(date,file,'서울')
+jobway_graph_location(date,file,'경기')
+jobway_graph_location(date,file,'인천')
+jobway_graph_location(date,file,'대전')
+jobway_graph_location(date,file,'대구')
+jobway_graph_location(date,file,'부산')
+jobway_graph_location(date,file,'광주')
+jobway_graph_location(date,file,'울산')
+
+
+
