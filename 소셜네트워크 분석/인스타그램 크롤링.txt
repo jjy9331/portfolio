@@ -1,0 +1,134 @@
+import os
+import urllib.request, urllib.parse, urllib.error
+from selenium import webdriver as wd
+from selenium.webdriver.common.keys import Keys
+from bs4 import BeautifulSoup as soup
+import time
+import json
+from collections import OrderedDict
+
+# 인스타그램 로그인 URL
+loginUrl = 'https://www.instagram.com/accounts/login/'
+
+# driver load
+#driver = wd.Chrome(executable_path= r'/Users/jeongjiyong/Desktop/코딩/크롤러/실습/chromedriver'
+driver = wd.Chrome(executable_path= r'크롬드라이버 폴더 경로를 넣어주세요/chromedriver')
+
+driver.implicitly_wait(5)
+
+# 웹 사이트 접속
+driver.get(loginUrl)
+
+# 사전 정보 정의
+username = '아이디를 넣어 주세요'
+userpw = '비밀번호를 넣어 주세요'
+hashTag = '키워드를 넣어주세요' # ok캐쉬백
+hashLink = '//a[@href="/explore/tags/'+hashTag+'/"]'
+
+# 로그인 정보 입력
+driver.find_element_by_name('username').send_keys(username)
+driver.find_element_by_name('password').send_keys(userpw)
+
+driver.implicitly_wait(5)
+driver.find_element_by_xpath('//*[@id="react-root"]/section/main/div/article/div/div[1]/div/form/div[4]/button').submit()
+
+# 태그 입력
+driver.find_element_by_xpath("""//*[@id="react-root"]/section/nav/div[2]/div/div/div[2]/input""").send_keys(hashTag)
+driver.implicitly_wait(8)
+
+#인스타그램 검색결과 URL을 만드는 함수
+def insta_searching(word):
+    url = "https://www.instagram.com/explore/tags/" + word
+    return url
+
+
+
+#HTML에서 첫번째 게시글 찾아 클릭하기
+def select_first(driver):
+    first = driver.find_element_by_css_selector("div._9AhH0")
+    first.click()
+    time.sleep(3)
+    
+    
+    
+#게시글 정보 가져오기
+import re
+
+def get_content(driver):
+    # ① 현재 페이지 html 정보 가져오기
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'lxml')
+    # ② 본문 내용 가져오기
+    try:
+        content = soup.select('div.C4VMK > span')[0].text
+    except:
+        content = ' '
+    # ③ 본문 내용에서 해시태그 가져오기(정규식 활용)
+    tags = re.findall(r'#[^\s#,\\]+', content)  
+    # ④ 작성일자 정보 가져오기
+    date = soup.select('time._1o9PC.Nzb55')[0]['datetime'][:10]
+    # ⑤ 좋아요 수 가져오기
+    try:
+        like = soup.select('div.Nm9Fw > button')[0].text[4:-1]   
+    except:
+        like = 0
+    # ⑥ 위치정보 가져오기
+    try: 
+        place = soup.select('div.M30cS')[0].text
+    except:
+        place = ''
+    # ⑦ 수집한 정보 저장하기
+    data = [content, date, like, place, tags]
+    return data
+
+#다음 게시글 열기
+def move_next(driver):
+
+    right = driver.find_element_by_css_selector ('a._65Bje.coreSpriteRightPaginationArrow')
+    right.click()
+    time.sleep(3)
+    
+    
+    
+#인스타그램 크롤링
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import time
+import re
+
+
+# ② 인스타그램 검색페이지 URL 만들기
+word = hashTag    #검색어
+url = insta_searching(word)
+
+# ③ 검색페이지 접속하기
+driver.get(url)
+time.sleep(3)
+
+# ④ 첫 번째 게시글 열기
+select_first(driver)
+
+# ⑤ 비어있는 변수(results)만들기
+results = [ ]
+
+
+# ⑥→⑦→⑧ 여러 게시물 수집하기
+target = 50      # 크롤링할 게시글 수
+for i in range(target):
+    data = get_content(driver)    # 게시글 정보 가져오기
+    results.append(data)
+    move_next(driver)
+
+print(results[:2])
+
+
+
+#크롤링 결과 저장하기
+
+import pandas as pd
+
+results_df = pd.DataFrame(results)
+results_df.columns = ['content','data','like','place','tags']
+# 예
+#results_df.to_excel(r'/Users/jeongjiyong/Desktop/코딩/크롤러/실습_데이터분석실무/sk/3_1_ok캐쉬백.xlsx')
+results_df.to_excel(r'.xlsx')

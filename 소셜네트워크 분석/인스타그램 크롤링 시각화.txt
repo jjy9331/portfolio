@@ -1,0 +1,100 @@
+# 예제 4-10 크롤링 결과 중 해시태그 데이터 불러오기
+
+import pandas as pd
+#r'/Users/jeongjiyong/Desktop/코딩/크롤러/실습_데이터분석실무/sk/3_6_sk주유소.xlsx'
+raw_total = pd.read_excel(r'인스타그램 크롤링으로 만든 엑셀 데이터 경로를 넣어주세요.xlsx')
+raw_total['tags'] [:3]
+
+#해시태그 통합 저장하기
+
+tags_total = []
+
+for tags in raw_total['tags']:
+    tags_list = tags[2:-2].split("', '")
+    for tag in tags_list:
+        tags_total.append(tag)
+        
+        
+#빈도수 집계하기(Counter)
+
+from collections import Counter
+tag_counts = Counter(tags_total)
+
+#가장 많이 사용된 해시태그 살펴보기
+tag_counts.most_common(50)
+
+
+#데이터 정제하기
+
+#STOPWORDS = ['#sk', '#skplant', '#sk플래닛', '#sk렌터카', '#시럽월렛', '#주유소',
+    '#스피드메이트']
+
+STOPWORDS = ['관련 키워드를 넣어주세요. 갯수는 상관 없습니다.']
+
+
+tag_total_selected = []
+
+for tag in tags_total:
+    if tag not in STOPWORDS:
+        tag_total_selected.append(tag)
+    
+tag_counts_selected = Counter(tag_total_selected)
+tag_counts_selected.most_common(10)
+
+
+#시각화 라이브러리 호출 및 환경 설정(한글 폰트)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib import font_manager, rc
+import sys
+
+if sys.platform in ["win32", "win64"]:
+    font_name = "malgun gothic"
+elif sys.platform == 'darwin':
+    font_name = "AppleGothic"
+  
+rc('font',family=font_name)
+
+#데이터 준비하기
+tag_counts_df = pd.DataFrame(tag_counts_selected.most_common(30))
+tag_counts_df.columns = ['tags', 'counts']
+
+
+#막대 차트 그리기
+
+plt.figure(figsize=(10,8))
+sns.barplot(x='counts', y='tags', data = tag_counts_df)
+#r'/Users/jeongjiyong/Desktop/코딩/크롤러/실습_데이터분석실무/sk/3_6_sk주유소tag-pol.png'
+plt.savefig(r'그래프 저장할 경로/막대 그래프 이름.png')
+
+#워드클라우드 라이브러리 불러오기
+
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import platform
+
+if platform.system() == 'Windows':   #윈도우의 경우
+    font_path = "c:/Windows/Fonts/malgun.ttf"
+elif platform.system() == "Darwin":   #Mac 의 경우
+    font_path = "/Users/$USER/Library/Fonts/AppleGothic.ttf"
+
+#워드클라우드 만들기
+
+wordcloud=WordCloud(font_path= font_path, 
+                    background_color="white",
+                    max_words=100,
+                    relative_scaling= 0.3,
+                    width = 800,
+                    height = 400
+                    ).generate_from_frequencies(tag_counts_selected)
+plt.figure(figsize=(15,10))
+plt.imshow(wordcloud)
+plt.axis('off')
+#'/Users/jeongjiyong/Desktop/코딩/크롤러/실습_데이터분석실무/sk/3_6_sk주유소tag-wordcloud.png'
+plt.savefig(r'그래프 저장할 경로/워드크라우드 이름.png')
+
+
+
+
+
