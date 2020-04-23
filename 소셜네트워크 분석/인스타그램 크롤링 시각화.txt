@@ -1,4 +1,4 @@
-# 예제 4-10 크롤링 결과 중 해시태그 데이터 불러오기
+#크롤링 결과 중 해시태그 데이터 불러오기
 
 import pandas as pd
 #r'/Users/jeongjiyong/Desktop/코딩/크롤러/실습_데이터분석실무/sk/3_6_sk주유소.xlsx'
